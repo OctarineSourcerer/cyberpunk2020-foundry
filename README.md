@@ -1,10 +1,9 @@
 # cyberpunk2020 (for FoundryVTT)
-*A note about Foundry 0.8.x. I do plan to migrate this system to it, and have made some progress doing so, but there are (last I tried) some bugs in 0.8.2 that make it impossible for for me to do that work for items. So bear with me when 0.8.3 releases :)*
+*A note about Foundry 0.8.x. Migration's in process, and mostly done, but there are some evasive bugs with migration and using items-as-skills that are making it take longer than usual*
 
 R. Talsorian Games' [Cyberpunk 2020](https://talsorianstore.com/products/cyberpunk-2020) system, but for FoundryVTT. Time to get chromed, and frag some slags.
 
 ![image](https://user-images.githubusercontent.com/6842867/115111007-0f80f900-9f76-11eb-8b42-7f6b6682a6a3.png) ![image](https://user-images.githubusercontent.com/6842867/115111021-26bfe680-9f76-11eb-93ee-7cf42d44190f.png)
-
 
 I believe this is now ready to reasonably run games in without anything particularly fundamental missing (minus, at the moment, custom skills).
 Here's the gist of what's there so far:
@@ -17,14 +16,15 @@ Here's the gist of what's there so far:
   * SP is currently just added together for each equipped piece of armor. Proportional armor will possibly come later.
 * Ranged attacks for single shots, as well as three-round burst and autofire for automatic weapons.
 * Easy modifier selection when making ranged attacks.
+* A start of cyberpunk's melee system
 
 Yet to come:
 * Ammo expenditure and reloads easily doable from chat messages.
 * Attack hit roll automatically translating to the name of the hit location.
 * Target selection for attacks.
-* The smorgasbord that is cyberpunk's melee system.
+* Martial arts key moves
 * Non-0-point skills to be shown first.
-* Improvement points for skills, custom skills.
+* In progress: Improvement points for skills, custom skills. 
   * The biggest thing here is figuring out a non-cluttered UI for these.
 * Template area selection for area attacks
 * Netrunning: Please dear gods, I've not used it in a campaign so it's a little far down my list
@@ -43,3 +43,6 @@ At the moment, this project only requires running `sass --watch scss/cyberpunk20
 
 ### Recent repo url change
 It used to be this repo was called `cyberpunk2020-foundry`, and you'd have to change the folder name after cloning. Not anymore! But due to the rename, if you had the repo, you'll likely want to run `git remote set-url origin git@github.com:OctarineSourcerer/cyberpunk2020.git` to make sure your repo points to the rename (I don't know how long old versions will link to it).
+
+### Time I have
+The amount I can do for this repo goes up and down sometimes, so don't be particularly worried if some couple-week gaps happen. Just means I'm a little busy :)

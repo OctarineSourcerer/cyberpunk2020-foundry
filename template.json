@@ -784,16 +784,9 @@
 		}
 	},
 	"Item": {
-		"types": [
-			"weapon",
-			"armor",
-			"cyberware",
-			"vehicle",
-			"misc"
-		],
+		"types": ["skill", "weapon", "armor", "cyberware", "vehicle", "misc"],
 		"templates": {
 			"common": {
-				"name": "Common",
 				"flavor": "",
 				"notes": "",
 				"cost": 0,
@@ -801,6 +794,17 @@
 				"equipped": true,
 				"source": ""
 			}
+		},
+		"skill": {
+			"flavor": "",
+			"notes": "",
+			"level": 0,
+			"chipLevel": 0,
+			"ip": 0,
+			"diffMod": 1,
+			"isChipped": false,
+			"isRoleSkill": false,
+			"stat": "cool"
 		},
 		"weapon": {
 			"templates": [

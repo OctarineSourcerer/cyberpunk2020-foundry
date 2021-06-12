@@ -1,6 +1,7 @@
 import { weaponTypes, rangedAttackTypes, meleeAttackTypes, fireModes, ranges, rangeDCs, rangeResolve, attackSkills, martialActions } from "../lookups.js"
 import { Multiroll, makeD10Roll }  from "../dice.js"
 import { clamp, deepLookup, localize, localizeParam, rollLocation } from "../utils.js"
+import { CyberpunkActor } from "../actor/actor.js";
 
 /**
  * Extend the basic Item with some very simple modifications.
@@ -35,9 +36,18 @@ export class CyberpunkItem extends Item {
     // If new owner and armor covers this many areas or more, delete armor coverage areas the owner does not have
     const COVERAGE_CLEANSE_THRESHOLD = 20;
 
+    let skipReform = false;
+    // Sometimes this just BREAKS
+    try {
+      let idCheck = this.actor.id;
+    }
+    catch {
+      skipReform = true;
+    }
+
     let nowOwned = !data.lastOwnerId && this.actor;
     let changedHands = data.lastOwnerId !== undefined && data.lastOwnerId != this.actor.id;
-    if(nowOwned || changedHands) {
+    if(!skipReform && (nowOwned || changedHands)) {
       data.lastOwnerId = this.actor.id;
       let ownerLocs = this.actor.data.data.hitLocations;
       
@@ -251,7 +261,7 @@ export class CyberpunkItem extends Item {
 
     return makeD10Roll(attackTerms, {
       stats: this.actor.data.data.stats,
-      attackSkill: this.actor.realSkillValue(deepLookup(this.actor.data.data.skills, this.data.data.attackSkill))
+      attackSkill: this.actor.getSkillVal(this.data.data.attackSkill)
     }).roll();
   }
 
@@ -372,9 +382,9 @@ export class CyberpunkItem extends Item {
     let martialArt = attackMods.martialArt;
 
     // Will be something this line once I add the martial arts bonuses. None for brawling, remember
-    // let martialBonus = this.actor?.data.data.skills.MartialArts[martialArt].bonuses[action];
+    // let martialBonus = this.actor?.skills.MartialArts[martialArt].bonuses[action];
     let martialBonus = 0;
-    let attackBonus = actor.realSkillValue(martialArt === "Brawling" ? actor.data.data.skills.Brawling : actor.data.data.skills.MartialArts[martialArt]);
+    let attackBonus = actor.getSkillVal(martialArt);
     let flavor = game.i18n.has(`CYBERPUNK.${action + "Text"}`) ? localize(action + "Text") : "";
 
     let results = new Multiroll(localizeParam("MartialTitle", {action: localize(action), martialArt: localize("Skill" + martialArt)}), flavor);

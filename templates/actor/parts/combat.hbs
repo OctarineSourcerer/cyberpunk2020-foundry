@@ -26,13 +26,13 @@
         </div>
         
         <div class="field-list one-col">
-            {{#each data.gear.armor}}
-            <div class="field item-edit" data-item-id="{{_id}}">
-                <div class="field-image" style="background-image: url({{img}})" data-item-id="{{_id}}"></div>
+            {{#each gear.armor}}
+            <div class="field item-edit" data-item-id="{{id}}">
+                <div class="field-image" style="background-image: url({{img}})" data-item-id="{{id}}"></div>
                 <label class="name">{{name}}</label>
                 <span class="flex-pad"></span>
                 <span>
-                    <label class="inactive">{{armorSummary data.coverage}}</label>
+                    <label class="inactive">{{armorSummary data.data.coverage}}</label>
                 </span>
             </div>
             {{/each}}
@@ -43,13 +43,15 @@
         <header>
             <h2>{{CPLocal "Weapons"}}</h2>
         </header>
-        {{#each data.gear.weapons as |weapon|}}
-            <div class="fire-weapon field action" data-item-id="{{weapon._id}}">
-                <div class="no-action field-image item-edit" style="background-image: url({{weapon.img}})" data-item-id="{{weapon._id}}"></div>
+        {{#each gear.weapons as |weapon|}}
+            <div class="fire-weapon field action" data-item-id="{{weapon.id}}">
+                <div class="no-action field-image item-edit" style="background-image: url({{weapon.img}})" data-item-id="{{weapon.id}}"></div>
                 <label class="name">{{weapon.name}}</label>
                 <span class="flex-pad"></span>
                 <span>
-                    <div class="field-label inactive">{{#if weapon.data.attackType}}{{weapon.data.attackType}}{{else}}{{weapon.data.weaponType}}{{/if}}</div>
+                    {{#with weapon.data.data}}
+                    <div class="field-label inactive">{{#if attackType}}{{attackType}}{{else}}{{weaponType}}{{/if}}</div>
+                    {{/with}}
                 </span>
             </div>
         {{/each}}

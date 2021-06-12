@@ -1,13 +1,12 @@
 {{!-- Structural Damage Points (SDP is a terrible name) --}}
 <div class="field-list">
     {{#with data.sdp}}
-        <div class="flexcol fillwidth" style="grid-column-end: span 2" title="{{CPLocal "SDPFull"}}">
-            <div class="meter-gauge fillwidth">
-                <span style="width: calc(100% * ({{value}}/{{max}}));" class="
-                {{#if (compare sdp.value "<=" (math max "/" 2))}}
-                danger
-                {{/if}}"></span>
-            </div>
+    <div class="flexcol fillwidth span-two-cells"  title="{{CPLocal "SDPFull"}}">
+        <div class="meter-gauge fillwidth">
+            <span style="width: calc(100% * ({{value}}/{{max}}));" class="
+            {{#if (compare value "<=" (math max "/" 2))}}
+            danger
+            {{/if}}"></span>
         </div>
 
         <div class="field">
@@ -30,7 +29,7 @@
 <div class="field-list">
     {{!-- There's a reason I don't use meter here - it's evil to style, and IE doesn't support it. If anyone playing this is using IE, they're already in the dystopia --}}
     {{#with data.speed}}
-    <div class="flexcol fillwidth" style="grid-column-end: span 2">
+    <div class="flexcol fillwidth span-two-cells">
         <div class="meter-gauge fillwidth">
             <span style="width: calc(100% * ({{value}}/{{max}}));" class="
             {{#if (compare value ">" maneuver)}}
@@ -75,7 +74,7 @@
 {{!-- Fuel --}}
 <div class="field-list">
     {{#with data.fuel}}
-    <div class="flexcol fillwidth" style="grid-column-end: span 2">
+    <div class="flexcol fillwidth span-two-cells">
         <div class="meter-gauge fillwidth">
             <span style="width: calc(100% * ({{value}}/{{max}}));" class="
             {{#if (compare value "<" (math max "/" 3))}}

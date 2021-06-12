@@ -1,7 +1,7 @@
 <div class="field-list no-wrap">
     <div class="field">
         <label for="totalCyberCost">{{CPLocal "TotalEBVal"}}</label>
-        <input name="totalCyberCost" type="number" value="{{data.gear.cyberCost}}">
+        <input name="totalCyberCost" type="number" value="{{gear.cyberCost}}" readonly>
     </div>
     <div class="field">
         <label for="data.stats.emp.humanity.loss">{{CPLocal "HumanityLoss"}}</label>
@@ -10,24 +10,26 @@
 </div>
 
 {{#if (equals items.length 0)}}
-    <div class="inactive">Drag items here to add (for now)</div>
+    <div class="inactive">{{CPLocal "DragItemsPrompt"}}</div>
 {{/if}}
 <div class="field-list">
-    {{#each data.gear.cyberware as |cyber|}}
-        <div class="field gear item-edit full-width" data-item-id="{{cyber._id}}">
-            <div class="field-image" style="background-image: url({{cyber.img}})" data-item-id="{{cyber._id}}"></div>
+    {{#each gear.cyberware as |cyber|}}
+        <div class="field gear item-edit full-width" data-item-id="{{cyber.id}}">
+            <div class="field-image" style="background-image: url({{cyber.img}})" data-item-id="{{cyber.id}}"></div>
             <label>{{cyber.name}}</label>
             <span class="flex-pad"></span>
-            <span>{{CPLocal "HumanityLossAbbrev"}}: {{cyber.data.humanityLoss}}</span>
-            {{#if cyber.data.cyberwareType}}
-            <span>
-                <p class="inactive">{{cyber.data.cyberwareType}}
-                    {{~#if cyber.data.cyberwareSubtype~}}
-                    ({{cyber.data.cyberwareSubtype}})
-                    {{~/if}}</p>
-            </span>
-            {{/if}}
-            <span class="item-delete" data-item-id="{{_id}}">X</span>
+            {{#with cyber.data.data}}
+                <span>{{CPLocal "HumanityLossAbbrev"}}: {{humanityLoss}}</span>
+                {{#if cyberwareType}}
+                <span>
+                    <p class="inactive">{{cyberwareType}}
+                        {{~#if cyberwareSubtype~}}
+                        ({{cyberwareSubtype}})
+                        {{~/if}}</p>
+                </span>
+                {{/if}}
+            {{/with}}
+            <span class="item-delete" data-item-id="{{id}}">X</span>
         </div>
     {{/each}}
 </div>

@@ -55,7 +55,9 @@
 
         {{!-- Biography Tab --}}
         <div class="tab life flexcol" data-group="primary" data-tab="life">
-            {{> "systems/cyberpunk2020/templates/actor/parts/lifepath.hbs"}}
+            <div class="biography">
+                {{editor content=data.notes target="data.notes" button=true owner=owner editable=options.editable}}
+            </div>
         </div>
     </section>
 </form>

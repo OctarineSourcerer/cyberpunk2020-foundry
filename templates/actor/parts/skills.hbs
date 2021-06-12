@@ -11,26 +11,8 @@
 
 {{!-- Actual skills --}}
 <div class="field-list">
-    {{#each skillDisplayList as |skillName|}}
-    {{#with (lookup ../data.skills skillName) as |skill|}}
-        {{#unless skill.group}}
-        {{> (template "actor/parts/skill") skill=skill name=skillName edit=skillName}}
-        {{else}}
-            <details class="field skill-group">
-                <summary>{{localize (skillRef skillName)}}</summary>
-                <div class="field-list one-col">
-                {{#each . as |childSkill childSkillName|}}
-                    {{!-- Any object children of groups should be a skill. Don't make me go recursive with this. --}}
-                    {{#if (isObject childSkill)}}
-                        {{> (template "actor/parts/skill") skill=childSkill 
-                        name=childSkillName 
-                        edit=(concat skillName "." childSkillName)}}
-                    {{/if}}
-                {{/each}}
-                </div>
-            </details>
-        {{/unless}}
-    {{/with}}
+    {{#each skillDisplayList as |skill|}}
+        {{> (template "actor/parts/skill") skill=skill}}
     {{/each}}
 </div>
 

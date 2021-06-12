@@ -20,30 +20,30 @@
         {{#with data.stats}}
         <div class="field">
             <label title="{{CPLocal "BTM"}}">{{CPLocal 'BTMShort'}}</label>
-            <input class="value not-editable" value="{{data.stats.bt.modifier}}" readonly>
+            <input class="value not-editable" value="{{bt.modifier}}" readonly>
         </div>
         <div class="field">
             <label>{{CPLocal "Carry"}}</label>
-            <input class="value not-editable" value="{{data.stats.bt.carry}}" readonly>
+            <input class="value not-editable" value="{{bt.carry}}" readonly>
         </div>
         {{!-- Tends to be a bigger number than most others --}}
         <div class="field liftstat" style="flex-grow: 4;">
             <label>{{CPLocal "Lift"}}</label>
-            <input class="rightborder not-editable" value="{{data.stats.bt.lift}}" readonly>
+            <input class="rightborder not-editable" value="{{bt.lift}}" readonly>
         </div>
         <div class="field">
             <label>{{CPLocal "Leap"}}</label>
-            <input class="not-editable" value="{{data.stats.ma.leap}}" readonly>
+            <input class="not-editable" value="{{ma.leap}}" readonly>
         </div>
         <div class="field">
             <label>{{CPLocal "Run"}}</label>
-            <input class="rightborder not-editable" value="{{data.stats.ma.run}}" readonly>
+            <input class="rightborder not-editable" value="{{ma.run}}" readonly>
         </div>
         {{!-- Humanity is a whole X/Y value, so needs more of the extra space --}}
         <div class="field" style="flex-grow: 6;">
             {{!-- This is only short so the sheet isn't distorted --}}
             <label title={{CPLocal "Humanity"}}>{{CPLocal "HumanityShort"}}</label>
-            <input type="text" class="rightborder not-editable" value="{{data.stats.emp.humanity.total}}/{{data.stats.emp.humanity.base}}" readonly>
+            <input type="text" class="rightborder not-editable" value="{{emp.humanity.total}}/{{emp.humanity.base}}" readonly>
         </div>
         {{/with}}
     </div>

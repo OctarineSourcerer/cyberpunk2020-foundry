@@ -1,6 +1,6 @@
 import { makeD10Roll, Multiroll } from "../dice.js";
-import { SortOrders, sortSkills } from "./skill-sort.js";
-import { properCase, localize, deepLookup } from "../utils.js"
+import { SortOrders, sortSkills, byName } from "./skill-sort.js";
+import { properCase, localize, deepLookup, getDefaultSkills } from "../utils.js"
 
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
@@ -8,10 +8,11 @@ import { properCase, localize, deepLookup } from "../utils.js"
  */
 export class CyberpunkActor extends Actor {
 
+
   /** @override */
-  static async create(data, options={}) {
+  async _preCreate(data, options={}) {
     data.token = data.token || {};
-    if ( data.type === "character" ) {
+    if (data.type === "character" ) {
       mergeObject(data.token, {
         vision: true,
         dimSight: 30,
@@ -20,7 +21,18 @@ export class CyberpunkActor extends Actor {
         disposition: 1
       }, {overwrite: false});
     }
-    return super.create(data, options);
+    
+    const createData = data;
+    // Using toObject is important - foundry REALLY doesn't like creating new documents from documents themselves
+    const skillsData = 
+      sortSkills(await getDefaultSkills(), SortOrders.Name)
+      .map(item => item.toObject());
+    if (typeof data.data === "undefined") {
+      createData.items = [];
+      createData.items = data.items.concat(skillsData);
+      createData["data.skillsSortedBy"] = "Name";
+    }
+    this.data.update(createData);
   }
 
   /**
@@ -141,16 +153,18 @@ export class CyberpunkActor extends Actor {
 
   /**
    * 
-   * @param {string} sortOrder The order to sort skills by. Options are in skill-sort.js's SortOrders. "stat" or "alph". Default "alph".
+   * @param {string} sortOrder The order to sort skills by. Options are in skill-sort.js's SortOrders. "Name" or "Stat". Default "Name".
    */
-  sortSkills(sortOrder) {
+  sortSkills(sortOrder = "Name") {
+    let allSkills = this.itemTypes.skill;
     sortOrder = sortOrder || Object.keys(SortOrders)[0];
     console.log(`Sorting skills by ${sortOrder}`);
-    let sortedView = sortSkills(this.data.data.skills, SortOrders[sortOrder]);
+    let sortedView = sortSkills(allSkills, SortOrders[sortOrder]).map(skill => skill.id);
 
     // Technically UI info, but we don't wanna calc every time we open a sheet so store it in the actor.
     this.update({
-      "data.sortedSkillView": sortedView,
+      // Why is it that when storing Item: {data: {data: {innerdata}}}, it comes out as {data: {innerdata}}
+      "data.sortedSkillIDs": sortedView,
       "data.skillsSortedBy": sortOrder
     });
   }
@@ -160,7 +174,9 @@ export class CyberpunkActor extends Actor {
    * I couldn't figure out a single formula that'd work for it (cos of the weird widths of BT values)
    */
   static btm(body) {
-    if(body < 2) throw "Body type cannot be below 2."
+    if(body <= 2) {
+      return 0;
+    }
     switch(body) {
       case 2: return 0
       case 3: 
@@ -195,38 +211,43 @@ export class CyberpunkActor extends Actor {
     return this.stunThreshold() + 3;
   }
 
+  // TODO: Again, will not work if skill names localized
   trainedMartials() {
-    return Object.entries(this.data.data.skills.MartialArts).filter(([_, art]) => art.value > 0).map(([name, _]) => name);
+    return this.itemTypes.skill.filter(skill => skill.name.startsWith("Martial")).filter(martial => martial.data.data.level > 0).map(martial => martial.name);
   }
 
   // TODO: Make this doable with just skill name
-  realSkillValue(skill) {
-    let value = skill.value;
-    if(skill.chipped && (skill.chipValue != undefined)) {
-      value = skill.chipValue;
+  static realSkillValue(skill) {
+    // Sometimes we use this to sort raw item data before it becomes a full-fledged item. So we use either data.data or data, as needed
+    let data = skill.data.data || skill.data;
+    let value = data.level;
+    if(data.isChipped) {
+      value = skill.chipValue || 0;
     }
     return value;
   }
 
-  rollSkill(skillName) {
-    // Is a deep lookup as the nested skills are likely "Martial.Aikido" or along those lines
-    let skill = deepLookup(this.data.data.skills, skillName);
-    let value = this.realSkillValue(skill);
+  getSkillVal(skillName) {
+    return CyberpunkActor.realSkillValue(this.itemTypes.skill.find(skill => skill.name === skillName));
+  }
+
+  rollSkill(skillId) {
+    let skill = this.items.get(skillId);
+    let skillData = skill.data.data;
+    let value = CyberpunkActor.realSkillValue(skill);
 
     let rollParts = [];
     rollParts.push(value);
 
-    if(skill.stat) {
-      rollParts.push(`@stats.${skill.stat}.total`);
+    if(skillData.stat) {
+      rollParts.push(`@stats.${skillData.stat}.total`);
     }
-    if(skillName === "AwarenessNotice") {
+    // TODO: When using localized names for skills, this will not work
+    if(skill.name === "Awareness/Notice") {
       rollParts.push("@skills.CombatSense.value");
     }
 
-    // When rolling skill, we use something like MartialArts.Aikido. Dots and translation keys don't play nice, so instead each group uses a translation prefix
-    let [parentName, childName] = skillName.split(".");
-    let translationKey = "Skill" + parentName;
-    let roll = new Multiroll(localize(translationKey))
+    let roll = new Multiroll(skill.name)
       .addRoll(makeD10Roll(rollParts, this.data.data));
 
     roll.defaultExecute();

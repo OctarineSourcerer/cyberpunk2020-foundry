@@ -1,3 +1,14 @@
+{{#*inline "itemListing"}}
+  <div class="field gear item-edit rc-item-delete" data-item-id="{{id}}">
+            <div class="field-image roll fire-weapon action" style="background-image: url({{img}})" data-item-id="{{id}}"></div>
+            <label>{{name}}</label>
+            <span class="flex-pad"></span>
+            <span>
+                <p class="inactive">{{type}}</p>
+            </span>
+        </div>
+{{/inline}}
+
 <div class="field-list no-wrap">
     <div class="field">
         <label for="data.eurobucks">{{CPLocal "Eurobucks"}}</label>
@@ -13,37 +24,13 @@
     <div class="inactive">Drag items here to add (for now)</div>
 {{/if}}
 <div class="field-list">
-    {{#each data.gear.weapons as |weapon|}}
-        <div class="field gear item-edit" data-item-id="{{weapon._id}}">
-            <div class="field-image roll fire-weapon action" style="background-image: url({{weapon.img}})" data-item-id="{{weapon._id}}"></div>
-            <label>{{weapon.name}}</label>
-            <span class="flex-pad"></span>
-            <span>
-                <p class="inactive">{{type}}</p>
-            </span>
-            <span class="item-delete" data-item-id="{{_id}}">X</span>
-        </div>
+    {{#each gear.weapons}}
+        {{> itemListing}}
     {{/each}}
-    {{#each data.gear.armor}}
-        <div class="field gear item-edit" data-item-id="{{_id}}">
-            <div class="field-image item-roll action" style="background-image: url({{img}})" data-item-id="{{_id}}"></div>
-            <label class="name">{{name}}</label>
-            <span class="flex-pad"></span>
-            <span>
-                <label class="inactive">{{type}}</label>
-            </span>
-            <span class="item-delete" data-item-id="{{_id}}">X</span>
-        </div>
+    {{#each gear.armor}}
+        {{> itemListing}}
     {{/each}}
-    {{#each data.gear.misc}}
-        <div class="field gear item-edit" data-item-id="{{_id}}">
-            <div class="field-image item-roll action" style="background-image: url({{img}})" data-item-id="{{_id}}"></div>
-            <label class="name">{{name}}</label>
-            <span class="flex-pad"></span>
-            <span>
-                <label class="inactive">{{type}}</label>
-            </span>
-            <span class="item-delete " data-item-id="{{_id}}">X</span>
-        </div>
+    {{#each gear.misc}}
+        {{> itemListing}}
     {{/each}}
 </div>

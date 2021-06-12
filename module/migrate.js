@@ -1,9 +1,13 @@
+import { sortSkills, SortOrders } from "./actor/skill-sort.js";
+import { getDefaultSkills, localize, tryLocalize } from "./utils.js";
+
 const updateFuncs = {
     "Actor": migrateActorData,
     "Item": migrateItemData
 }
 // I know there's a lot of await in here, and I think it might be possible to not wait for the results of updating entities. But I also don't know if it would blow foundry up to get so many update requests so far.
 
+let migrationSuccess = true;
 // Handle migration of things. The shape of it nabbed from 5e
 export async function migrateWorld() {
     if (!game.user.isGM) {
@@ -11,35 +15,43 @@ export async function migrateWorld() {
         return;
     }
 
-    for(let actor of game.actors.entities) {
-        migrateEntity(actor);
-        actor.items.forEach(item => migrateEntity(item));
+    for(let actor of game.actors.contents) {
+        migrateDocument(actor);
+        actor.items.forEach(item => migrateDocument(item));
     }
-    for(let item of game.items.entities) {
-        migrateEntity(item);
+    for(let item of game.items.contents) {
+        migrateDocument(item);
     }
-    for(let compendium of game.packs.entries) {
+    for(let compendium of game.packs.contents) {
         migrateCompendium(compendium);
     }
-    game.settings.set("cyberpunk", "systemMigrationVersion", game.system.data.version);
-    ui.notifications.info(`Cyberpunk2020 System Migration to version ${game.system.data.version} completed!`, {permanent: true});
-}
-
-const defaultDataUse = async (entity, updateData) => {
-    if (!isObjectEmpty(updateData)) {
-        await entity.update(updateData);
+    if(migrationSuccess) {
+        game.settings.set("cyberpunk2020", "systemMigrationVersion", game.system.data.version);
+        ui.notifications.info(`Cyberpunk2020 System Migration to version ${game.system.data.version} completed!`, {permanent: true});
+    }
+    else {
+        ui.notifications.error(`Cyberpunk2020 System Migration failed :( Please see console log for details`);
     }
 }
-async function migrateEntity(entity, withUpdataData = defaultDataUse) {
+
+const defaultDataUse = async (document, updateData) => {
+    if (!isObjectEmpty(updateData)) {
+        console.log(`Total update data for document ${document.name}:`);
+        console.log(updateData);
+        await document.update(updateData);
+    }
+}
+async function migrateDocument(document, withUpdataData = defaultDataUse) {
     try {
-        let migrateDataFunc = updateFuncs[entity.entity];
+        let migrateDataFunc = updateFuncs[document.documentName];
         if(migrateDataFunc === undefined) {
-            console.log(`No migrate function for entity with entity field "${entity.entity}"`);
+            console.log(`No migrate function for entity with documentName field "${document.documentName}"`);
         }
-        const updateData = migrateDataFunc(entity.data);
-        withUpdataData(entity, updateData);
+        const updateData = await migrateDataFunc(document.data);
+        withUpdataData(document, updateData);
     } catch(err) {
-        err.message = `Failed cyberpunk system migration for ${entity.data.type} ${entity.name}: ${err.message}`;
+        migrationSuccess = false;
+        err.message = `Failed cyberpunk system migration for ${document.data.type} ${document.name}: ${err.message}`;
         console.error(err);
         return;
     }
@@ -52,7 +64,7 @@ async function migrateEntity(entity, withUpdataData = defaultDataUse) {
  * @param {object} actorData    The actor data object to update
  * @return {Object}         The updateData to apply
  */
-export function migrateActorData(actorData) {
+export async function migrateActorData(actorData) {
     console.log(`Migrating data of ${actorData.name}`);
 
     // No need to migrate items currently
@@ -94,30 +106,69 @@ export function migrateActorData(actorData) {
             update[`lifepath`] = undefined;
         }
     }
-    for (const skillName in data.skills) {
-        let skill = data.skills[skillName];
-        if(skill.stat == "body") {
-            console.log(`Changing ${skillName}'s stat from body to bt (is body type because cyberpunk)`);
-            updateData[`data.skills.${skillName}.stat`] = "bt";
-        }
-        // Check for skills that have their stat as special, then assign the new stat from the template
-        if(skill.stat == "special") {
-            let actualStat = game.system.template.Actor.templates.skills.skills[skillName].stat;
-            console.log(`Changing ${skillName}'s stat from special to ${actualStat}, and marking it as a special skill`);
-            updateData[`data.skills.${skillName}.stat`] = actualStat;
-            updateData[`data.skills.${skillName}.isSpecial`] = true;
-        }
-        if(skillName == "Expert" || skillName == "Language") {
-            if(!skill.group) {
-                // No translation prefix as these will be custom entries
-                console.log(`Making Expert and Language into groups instead of empty entries.`);
-                updateData[`data.skills.${skillName}.group`] = true;
-            }
-        }
+    
+    // Traied skills that we keep
+    let trainedSkills = [];
+    if(data.skills) {
+        console.log(`${actorData.name} still uses non-item skills. Removing.`);
+        updateData["data.skills"] = undefined;
+
+        let trained = (skillData) => skillData.value > 0 || skillData.chipValue > 0;
+        // Catalogue skills with points in them to keep
+        trainedSkills = Object.entries(data.skills)
+            .reduce((acc, [name, skill]) => {
+                if(trained(skill)) {
+                    acc.push([name, skill]);
+                }
+                // Grouped skills and the pain that comes with them
+                else if(skill.group) {
+                    let parentName = name;
+                    acc.push(...Object.entries(skill)
+                        .filter(([name, subskill]) => name !== "group" && trained(subskill))
+                        .map(([name, subskill]) => {
+                            // Groups with subskills don't exist anymore - they introduced a lot of complexity and heck.
+                            // We're including in the new name the 
+                            let prefix = parentName === "MartialArts" ? "Martial Arts" : parentName;
+                            // We'll be having a different name than before, so localize here
+                            return [`${prefix}: ${localize("Skill"+name)}`, subskill]
+                        }));
+                }
+                return acc;
+            }, []);
+
+        trainedSkills = trainedSkills.map(([name, skillData]) => convertOldSkill(name, skillData))
     }
+    console.log("Trained skills:");
+    console.log(trainedSkills);
+    let skills = actorData.items.filter(item => item.type === "skill");
 
-    // update life path
+    // Migrate from pre-item times
+    if(skills.length === 0) {
+        console.log(`${actorData.name} does not have item skills. Adding aaaall 78 core ones`);
+        console.log(`Keeping any skills you had points in: ${trainedSkills.join(", ") || "None"}`);
 
+        // Key core skills by name so they may be overridden
+        let skillsToAdd = (await getDefaultSkills()).reduce((acc, item) => {
+            acc[item.name] = item.toObject();
+            return acc;
+        }, {});
+        // Override core skills with any trained skill by the same name
+        for(const trainedSkill of trainedSkills) {
+            // Old skills had localization keys as names, so we'll translate these
+            // Subskills have already been translated though, as we can only tell they're subskills while we were looping through them
+            // This is what happens when you migrate legacy, kids, it hurts
+            let localizedName = tryLocalize("Skill"+trainedSkill.name, trainedSkill.name);
+            skillsToAdd[localizedName] = trainedSkill;
+        }
+        console.log(skillsToAdd);
+        skillsToAdd = sortSkills(Object.values(skillsToAdd), SortOrders.Name);
+        updateData["data.skillsSortedBy"] = "Name";
+
+        // Keep current items
+        const currentItems = Array.from(actorData.items).map(item => item.toObject());
+        // TODO: This is repeated in a few places - centralise/refactor
+        updateData.items = currentItems.concat(currentItems, skillsToAdd);
+    }
 
     return updateData;
 } 
@@ -130,7 +181,7 @@ export function migrateItemData(itemData) {
     let data = itemData.data;
     let itemTemplates = game.system.template.Item[itemData.type].templates;
 
-    if(itemTemplates.includes("common") && data.source === undefined) {
+    if(itemTemplates?.includes("common") && data.source === undefined) {
         console.log(`${itemData.name} has no source field. Giving it one.`)
         updateData["data.source"] = "";
     }
@@ -149,14 +200,27 @@ export function migrateCompendium(compendium) {
         return
     }
     console.log(`Updating entities in compendium ${compendium.metadata.label}`);
-    let entityIds = compendium.index.map(e => e._id);
+    let entityIds = compendium.index.map(e => e.id);
     entityIds.forEach(async (id) => {
         let entity = await compendium.getEntity(id);
-        migrateEntity(entity, async (entity, updateData) => {
-            updateData._id = id;
+        migrateDocument(entity, async (entity, updateData) => {
+            updateData.id = id;
             await compendium.updateEntity(updateData);
         });
     });
 }
 
-
+// Take an old hardcoded skill and translate it into data for a skill item
+export function convertOldSkill(name, skillData) {
+    return {name: tryLocalize("Skill"+name, name), type: "skill", data: {
+        flavor: "",
+        notes: "",
+        level: skillData.value || 0,
+        chipLevel: skillData.chipValue || 0,
+        isChipped: skillData.chipped,
+        ip: skillData.ip,
+        diffMod: 1, // No skills have those currently.
+        isRoleSkill: skillData.isSpecial || false,
+        stat: skillData.stat
+    }};
+}

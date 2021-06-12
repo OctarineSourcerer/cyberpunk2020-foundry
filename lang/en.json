@@ -50,6 +50,13 @@
     "CYBERPUNK.Name": "Name",
     "CYBERPUNK.Stat": "Stat",
 
+    "CYBERPUNK.Level": "Value",
+    "CYBERPUNK.LevelChipped": "Value (chipped)",
+    "CYBERPUNK.ImprovementPoints": "Improvement Points",
+    "CYBERPUNK.DifficultyMod": "Difficulty Mod",
+    "CYBERPUNK.ImprovementPointsShort": "IP",
+    "CYBERPUNK.IsRoleSkill": "Is Role Skill",
+    "CYBERPUNK.Chipped": "Chipped",
     "CYBERPUNK.SkillAuthority": "Authority",
     "CYBERPUNK.SkillCharismaticLeadership": "Charismatic Leadership",
     "CYBERPUNK.SkillCombatSense": "Combat Sense",
@@ -170,7 +177,7 @@
     "CYBERPUNK.Shots": "Shots",
     "CYBERPUNK.ShotsLeft": "Shots Left",
     "CYBERPUNK.AP": "AP",
-    "CYBERPUNK.RoF": "RoF",
+    "CYBERPUNK.RoF": "Rate of Fire",
     "CYBERPUNK.Reliability": "Reliability",
     "CYBERPUNK.Range": "Range",
     "CYBERPUNK.RangePointBlank": "Point Blank (<1m)",
@@ -362,7 +369,8 @@
     "CYBERPUNK.No": "No",
     "CYBERPUNK.OK": "OK",
     "CYBERPUNK.ItemDeleteConfirmTitle": "Delete Item?",
-    "CYBERPUNK.ItemDeleteConfirmText": "Are you sure you want to delete this item?",
+    "CYBERPUNK.ItemDeleteConfirmText": "Are you sure you want to delete {itemName}?",
+    "CYBERPUNK.DragItemsPrompt": "Drag items here to add (for now)",
 
     "CYBERPUNK.InitiativeTrackerWarning": "At the moment, rolling initiative from the sheet doesn't add to the encounter's combat tracker.",
     "CYBERPUNK.MigrateMessage": "Migrating data of {target}",
@@ -406,4 +414,8 @@
     "CYBERPUNK.LifepathNotes": "Notes",
 
     "CYBERPUNK.NPC": "NPC"
+
+    "SETTINGS.SysMigration": "System Migration Version",
+    "SETTINGS.TrainedSkillsFirst": "Trained Skills First",
+    "SETTINGS.TrainedSkillsFirstHint": "Whether trained skills always come first in the skills list"
 }

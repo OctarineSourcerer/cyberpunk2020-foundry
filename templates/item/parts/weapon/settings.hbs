@@ -1,18 +1,38 @@
+{{!-- Stuff that affects a single given attack's effects at the other end --}}
 <div class="field-list">
     {{> (template "fields/number") label="Accuracy" edit="data.accuracy"}}
     {{> (template "fields/string") label="Damage" edit="data.damage"}}
+    {{> (template "fields/boolean") label="AP" edit="data.ap"}}
+    {{> (template "fields/number") label="Range" edit="data.range"}}
+
+    {{!-- Something like this will end up being in there, but it's not currently ready for release --}}
+    {{!-- <details class="field span-two-cells">
+        <summary>{{localize "Advanced"}}</summary>
+        <div class="field-list">
+            {{> (template "fields/string") label=(concat (localize "DamageShort") "(" (localize "PointBlank") ")")  edit="data.rangeDamages.pointBlank"}}
+            {{> (template "fields/string") label=(concat (localize "DamageShort") "(" (localize "Short") ")")  edit="data.rangeDamages.short"}}
+            {{> (template "fields/string") label=(concat (localize "DamageShort") "(" (localize "Medium") ")")  edit="data.rangeDamages.medium"}}
+            {{> (template "fields/string") label=(concat (localize "DamageShort") "(" (localize "Far") ")")  edit="data.rangeDamages.far"}}
+            {{> (template "fields/string") label=(concat (localize "DamageShort") "(" (localize "Extreme") ")")  edit="data.rangeDamages.extreme"}}
+        </div>
+    </details> --}}
+</div>
+
+{{!-- Stuff that affects how many shots the weapon can pump out --}}
+<div class="field-list">
     {{> (template "fields/number") label="ShotsLeft" edit="data.shotsLeft"}}
     {{> (template "fields/number") label="Shots" edit="data.shots"}}
-    {{> (template "fields/boolean") label="AP" edit="data.ap"}}
     {{> (template "fields/number") label="RoF" edit="data.rof"}}
     {{> (template "fields/select") label="Reliability" edit="data.reliability" choices=reliabilities}}
-    {{> (template "fields/number") label="Range" edit="data.range"}}
-    {{> (template "fields/string") label="AmmoType" edit="data.ammoType"}}
+</div>
 
+{{!-- What kind of thing is this weapon, how it's used --}}
+<div class="field-list">
     {{!-- When changing weapon type, the weapon's attack type will not update correspondingly until the sheet is closed --}}
     {{> (template "fields/select") label="WeaponType" edit="data.weaponType" choices=weaponTypes}}
     {{> (template "fields/select") label="AttackType" edit="data.attackType" choices=attackTypes allowBlank=true}}
     {{!-- Custom, as all the translate keys start with Skill, but they don't in the character --}}
+    {{!-- This might not need to be custom anymore, as regular selects can deal with choices that supply their own translateKeys --}}
     <div class="field">
         <label for="data.attackSkill">{{CPLocal "AttackSkill"}}</label>
         <div class="flex-pad"></div>
@@ -23,17 +43,11 @@
         </select>
     </div>
     {{> (template "fields/select") label="Concealability" edit="data.concealability" choices=concealabilities}}
+</div>
 
+{{!-- Market stuff --}}
+<div class="field-list">
     {{> (template "fields/select") label="Availability" edit="data.availability" choices=availabilities}}
-
-    <details class="field span-two-cells">
-        <summary>{{localize "Advanced"}}</summary>
-        <div class="field-list">
-            {{> (template "fields/string") label=(concat (localize "DamageShort") "(" (localize "PointBlank") ")")  edit="data.rangeDamages.pointBlank"}}
-            {{> (template "fields/string") label=(concat (localize "DamageShort") "(" (localize "Short") ")")  edit="data.rangeDamages.short"}}
-            {{> (template "fields/string") label=(concat (localize "DamageShort") "(" (localize "Medium") ")")  edit="data.rangeDamages.medium"}}
-            {{> (template "fields/string") label=(concat (localize "DamageShort") "(" (localize "Far") ")")  edit="data.rangeDamages.far"}}
-            {{> (template "fields/string") label=(concat (localize "DamageShort") "(" (localize "Extreme") ")")  edit="data.rangeDamages.extreme"}}
-        </div>
-    </details>
+    {{!-- Ammo counts as market, as it doesn't affect things mechanically currently --}}
+    {{> (template "fields/string") label="AmmoType" edit="data.ammoType"}}
 </div>

@@ -115,11 +115,11 @@ export function classifyRollDice(roll) {
      * }
      */
     async execute(speaker, templatePath, extraTemplateData={}) {
-        this.rolls.forEach(r => {
+        await Promise.all(this.rolls.map(async (r) => {
             if (!r._evaluated) {
-                r.evaluate();
+                return await r.evaluate({async: true});
             }
-        });
+        }));
         
         const fullTemplateData = mergeObject({
             user: game.user.id,

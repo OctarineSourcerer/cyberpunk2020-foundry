@@ -22,6 +22,10 @@ export let attackSkills = {
     "Exotic": []
 }
 
+export function getStatNames() {
+    return Object.keys(game.system.template.Actor.templates.stats.stats)
+}
+
 // How a weapon attacks. Something like pistol or an SMG have rigid rules on how they can attack, but shotguns can be regular or auto shotgun, exotic can be laser, etc. So this is for weird and special stuff that isn't necessarily covered by the weapon's type or other information
 // If we change attack type to be an array, we could say, have ["BEAM" "LASER"]
 export let rangedAttackTypes = {

@@ -17,21 +17,20 @@ export function replaceIn(replaceIn, replaceWith) {
 export function localize(str) {
     return game.i18n.localize("CYBERPUNK." + str);
 }
+export function tryLocalize(str, defaultResult=str) {
+    let key = "CYBERPUNK." + str;
+    if(!game.i18n.has(key))
+        return defaultResult;
+    else
+        return game.i18n.localize(key);
+}
 export function localizeParam(str, params) {
     return game.i18n.format("CYBERPUNK."+ str, params);
 }
 
 export function shortLocalize(str) {
-    if(!game.i18n.translations.CYBERPUNK) {
-        console.error("There are no localizations; is the localization file (eg lang/en.json) properly formatted?");
-        return str;
-    }
-    let makeShort = game.i18n.translations.CYBERPUNK[str + "Short"] !== undefined;
-    let key = "CYBERPUNK."+(makeShort ? str + "Short" : str)
-    if(!game.i18n.has(key))
-        return str;
-    else
-        return game.i18n.localize(key);
+    let makeShort = !!game.i18n.has("CYBERPUNK." + str + "Short");
+    return tryLocalize(makeShort ? str + "Short" : str);
 }
 /**
  * 
@@ -90,4 +89,32 @@ export function deepSet(startObject, path, value, overwrite=true) {
 // Clamp x to be between min and max inclusive
 export function clamp(x, min, max) {
     return Math.min(Math.max(x, min), max);
+}
+
+export async function getDefaultSkills() {
+    const pack = game.packs.get("cyberpunk2020.default-skills");
+    // put into basickSkills array
+    const content = await pack.getDocuments();
+    return content;
+}
+
+// Yet to be fully tested, but should let editing of compendiums go pretty easily
+async function changePackItems(packName, dataDeltaF, dryRun = false) {
+    let pack = game.packs.get(packName);
+    let ids = pack.index.map(e => e._id);
+    ids.forEach(async id => {
+        let entity = await pack.getEntity(id);
+        let oldData = entity.data;
+        let dataChange = dataDeltaF(oldData);
+        dataChange._id = id;
+        console.log(`update data:`);
+        console.log(dataChange);
+        if(!dryRun)
+            await pack.updateEntity(dataChange); 
+    });
+}
+
+async function exampleCompendiumData(packName) {
+    let pack = game.packs.get(packName);
+    return await pack.getEntity(pack.index[0].data);
 }
